@@ -24,11 +24,39 @@ router.get("/:id", validatePostId, (req, res) => {
     });
 });
 
-router.delete("/:id", (req, res) => {});
+router.delete("/:id", (req, res) => {
+  dataBase
+    .remove(req.params.id)
+    .then(hub => {
+      res.status(201).json(hub);
+    })
+    .catch(error => {
+      res.status(500).json({ message: "error deleting the user" });
+    });
+});
 
-router.put("/:id", (req, res) => {});
+router.put("/", tooLong, (req, res) => {
+  const id = req.body.project_id;
+  const changes = req.body;
+  dataBase
+    .update(id, changes)
+    .then(user => {
+      if (!user) {
+        res.status(500).json({ message: "no user of that ID to modify" });
+      } else {
+        dataBase.get(id).then(project => {
+          res
+            .status(200)
+            .send({ message: "Here is your updated project", project });
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({ message: "The target could not be modified" });
+    });
+});
 
-router.post("/", (req, res) => {
+router.post("/", tooLong, (req, res) => {
   const newAction = req.body;
   if (!newAction.project_id || !newAction.description || !newAction.notes) {
     res.status(400).json({
@@ -42,7 +70,7 @@ router.post("/", (req, res) => {
         res.status(201).json(user);
       })
       .catch(error => {
-        res.json({ message: "error saving the project" });
+        res.json({ message: "Project_id doesn't match any users" });
       });
   }
 });
@@ -57,6 +85,16 @@ function validatePostId(req, res, next) {
       next();
     }
   });
+}
+
+function tooLong(req, res, next) {
+  if (newAction.description > 128) {
+    res.status(413).json({
+      errorMessage: "The description must be less than 128 characters!"
+    });
+  } else {
+    next();
+  }
 }
 
 module.exports = router;
