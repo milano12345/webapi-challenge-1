@@ -12,3 +12,30 @@ I need this code, just don't know where, perhaps should make some middleware, do
 
 Go code!
 */
+const express = require("express");
+
+const projectsRouter = require("./data/seeds/projects/projectsRouter");
+const actionsRouter = require("./data/seeds/actions/actionsRouter");
+
+const server = express();
+
+server.use(express.json());
+
+// server.use('/api', apiRouter);
+server.use("/api/projects", projectsRouter);
+server.use("/api/actions", actionsRouter);
+// <<<<<<<<<<<<<<
+
+server.get("/", (req, res) => {
+  res.send(`
+    <p>Welcome to the Sprint Challenge!</p>
+  `);
+});
+
+// add an endpoint for adding new message to a hub
+
+server.listen(4000, () => {
+  console.log("\n*** Server Running on http://localhost:4000 ***\n");
+});
+
+PORT = "4000";
